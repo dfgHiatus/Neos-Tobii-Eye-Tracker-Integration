@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Neos_Tobii_Eye_Integration
 {
-	public class Neos_Tobii_Eye : NeosMod
+	public class Neos_Tobii_Eye_VR : NeosMod
 	{
 		// TODO
 		// Expose EyeTrackingOperations as *juicy* config vars
@@ -252,11 +252,11 @@ namespace Neos_Tobii_Eye_Integration
 			eyes.RightEye.IsDeviceActive = Engine.Current.InputInterface.VR_Active;
 			eyes.CombinedEye.IsDeviceActive = Engine.Current.InputInterface.VR_Active;
 
-			eyes.LeftEye.IsTracking = Neos_Tobii_Eye.leftIsValid;
-			eyes.RightEye.IsTracking = Neos_Tobii_Eye.rightIsValid;
-			eyes.CombinedEye.IsTracking = Neos_Tobii_Eye.leftIsValid || Neos_Tobii_Eye.rightIsValid;
+			eyes.LeftEye.IsTracking = Neos_Tobii_Eye_VR.leftIsValid;
+			eyes.RightEye.IsTracking = Neos_Tobii_Eye_VR.rightIsValid;
+			eyes.CombinedEye.IsTracking = Neos_Tobii_Eye_VR.leftIsValid || Neos_Tobii_Eye_VR.rightIsValid;
 
-			eyes.Timestamp = Neos_Tobii_Eye.timestamp;
+			eyes.Timestamp = Neos_Tobii_Eye_VR.timestamp;
 
 			eyes.LeftEye.Squeeze = 0f;
 			eyes.RightEye.Squeeze = 0f;
@@ -270,13 +270,13 @@ namespace Neos_Tobii_Eye_Integration
 			eyes.RightEye.Frown = 0f;
 			eyes.CombinedEye.Frown = 0f;
 
-			eyes.LeftEye.Openness = Neos_Tobii_Eye.leftBlink;
-			eyes.RightEye.Openness = Neos_Tobii_Eye.rightBlink;
-			eyes.CombinedEye.Openness = MathX.Clamp01(Neos_Tobii_Eye.leftBlink + Neos_Tobii_Eye.rightBlink);
+			eyes.LeftEye.Openness = Neos_Tobii_Eye_VR.leftBlink;
+			eyes.RightEye.Openness = Neos_Tobii_Eye_VR.rightBlink;
+			eyes.CombinedEye.Openness = MathX.Clamp01(Neos_Tobii_Eye_VR.leftBlink + Neos_Tobii_Eye_VR.rightBlink);
 
-			eyes.LeftEye.PupilDiameter = Neos_Tobii_Eye.leftRawPupil;
-			eyes.RightEye.PupilDiameter = Neos_Tobii_Eye.rightRawPupil;
-			eyes.CombinedEye.PupilDiameter = MathX.Average(Neos_Tobii_Eye.leftRawPupil + Neos_Tobii_Eye.rightRawPupil);
+			eyes.LeftEye.PupilDiameter = Neos_Tobii_Eye_VR.leftRawPupil;
+			eyes.RightEye.PupilDiameter = Neos_Tobii_Eye_VR.rightRawPupil;
+			eyes.CombinedEye.PupilDiameter = MathX.Average(Neos_Tobii_Eye_VR.leftRawPupil + Neos_Tobii_Eye_VR.rightRawPupil);
 
 		}
 	}
