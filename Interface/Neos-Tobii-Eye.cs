@@ -84,7 +84,7 @@ namespace Neos_Tobii_Eye_Integration
 			}
 			catch (Exception e)
             {
-				Error("An unexpected error occured when trying to initiallie Tobii Eye Tracking.");
+				Error("An unexpected error occured when trying to initiallize Tobii Eye Tracking.");
 				Error(e.Message);
             }
 
