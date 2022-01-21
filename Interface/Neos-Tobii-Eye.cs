@@ -3,24 +3,37 @@ using NeosModLoader;
 using FrooxEngine;
 using BaseX;
 using System;
+using Tobii.XR;
 
 namespace Neos_OpenSeeFace_Integration
 {
-	public class Neos_OpenSeeFace_Integration : NeosMod
+	public class Neos_Tobii_Eye : NeosMod
 	{
-		public override string Name => "Neos-WCFace-Integration";
+		public override string Name => "Neos-Tobii-Eye-Integration";
 		public override string Author => "dfgHiatus";
 		public override string Version => "1.0.0";
-		public override string Link => "https://github.com/dfgHiatus/https://github.com/dfgHiatus/Neos-Eye-Face-API/";
+		public override string Link => "https://github.com/dfgHiatus/Neos-Eye-Face-API/";
 		public override void OnEngineInit()
 		{
 			// Harmony.DEBUG = true;
-			Harmony harmony = new Harmony("net.dfgHiatus.Neos-Eye-Face-API");
+			var settings = new TobiiXR_Settings();
+			TobiiXR.Start(settings);
+			Harmony harmony = new Harmony("net.dfgHiatus.Neos-Tobii-Eye-Integration");
 			harmony.PatchAll();
 		}
 
+		[HarmonyPatch(typeof(Engine), "Shutdown")]
+		public class ShutdownPatch
+		{
+			public static bool Prefix()
+			{
+				TobiiXR.Stop();
+				return true;
+			}
+		}
+
 		[HarmonyPatch(typeof(InputInterface), MethodType.Constructor)]
-		[HarmonyPatch(new[] { typeof(Engine)})]
+		[HarmonyPatch(new[] { typeof(Engine) })]
 		public class InputInterfaceCtorPatch
 		{
 			public static void Postfix(InputInterface __instance)
@@ -31,10 +44,10 @@ namespace Neos_OpenSeeFace_Integration
 					Debug("Module Name: " + gen.ToString());
 					__instance.RegisterInputDriver(gen);
 				}
-				catch
+				catch (Exception e)
 				{
 					Warn("Module failed to initiallize.");
-					throw;
+					Warn(e.Message);
 				}
 			}
 		}
@@ -43,41 +56,24 @@ namespace Neos_OpenSeeFace_Integration
 	class GenericInputDevice : IInputDriver
 	{
 		public Eyes eyes;
-		public Mouth mouth;
-		public GenericDevice.EyeInterface.EyeData eyeInt = new GenericDevice.EyeInterface.EyeData();
-		public GenericDevice.MouthInterface.MouthData mouthInt = new GenericDevice.MouthInterface.MouthData();
 		public int UpdateOrder => 100;
 
 		public void CollectDeviceInfos(BaseX.DataTreeList list)
-        {
+		{
 			DataTreeDictionary EyeDataTreeDictionary = new DataTreeDictionary();
 			EyeDataTreeDictionary.Add("Name", "Generic Eye Tracking");
 			EyeDataTreeDictionary.Add("Type", "Eye Tracking");
 			EyeDataTreeDictionary.Add("Model", "Generic Eye Model");
 			list.Add(EyeDataTreeDictionary);
-
-			DataTreeDictionary MouthDataTreeDictionary = new DataTreeDictionary();
-			MouthDataTreeDictionary.Add("Name", "Generic Face Tracking");
-			MouthDataTreeDictionary.Add("Type", "Face Tracking");
-			MouthDataTreeDictionary.Add("Model", "Generic Face Model");
-			list.Add(MouthDataTreeDictionary);
 		}
 
 		public void RegisterInputs(InputInterface inputInterface)
 		{
 			eyes = new Eyes(inputInterface, "Generic Eye Tracking");
-			mouth = new Mouth(inputInterface, "Generic Mouth Tracking");
 		}
 
 		public void UpdateInputs(float deltaTime)
-        {
-			UpdateEyes();
-			UpdateMouth();
-		}
-
-		// See EyeInterface.cs for how to update these values
-		public void UpdateEyes()
-        {
+		{
 			eyes.LeftEye.IsDeviceActive = eyeInt.LeftIsDeviceActive;
 			eyes.RightEye.IsDeviceActive = eyeInt.RightIsDeviceActive;
 			eyes.CombinedEye.IsDeviceActive = eyeInt.CombinedIsDeviceActive;
@@ -107,39 +103,6 @@ namespace Neos_OpenSeeFace_Integration
 			eyes.LeftEye.PupilDiameter = eyeInt.LeftPupilDiameter;
 			eyes.RightEye.PupilDiameter = eyeInt.RightPupilDiameter;
 			eyes.CombinedEye.PupilDiameter = eyeInt.CombinedPupilDiameter;
-		}
-
-		// See MouthInterface.cs for how to update these values
-		public void UpdateMouth()
-        {
-			mouth.IsDeviceActive = mouthInt.IsDeviceActive;
-
-			mouth.IsTracking = mouthInt.IsTracking;
-
-			mouth.Jaw = mouthInt.Jaw;
-			mouth.Tongue = mouthInt.Tongue;
-
-			mouth.JawOpen = mouthInt.JawOpen;
-			mouth.MouthPout = mouthInt.MouthPout;
-			mouth.TongueRoll = mouthInt.TongueRoll;
-
-			mouth.LipBottomOverUnder = mouthInt.LipBottomOverUnder;
-			mouth.LipBottomOverturn = mouthInt.LipBottomOverturn;
-			mouth.LipTopOverUnder = mouthInt.LipTopOverUnder;
-			mouth.LipTopOverturn = mouthInt.LipTopOverturn;
-
-			mouth.LipLowerHorizontal = mouthInt.LipLowerHorizontal;
-			mouth.LipUpperHorizontal = mouthInt.LipUpperHorizontal;
-
-			mouth.LipLowerLeftRaise = mouthInt.LipLowerLeftRaise;
-			mouth.LipLowerRightRaise = mouthInt.LipLowerRightRaise;
-			mouth.LipUpperRightRaise = mouthInt.LipUpperRightRaise;
-			mouth.LipUpperLeftRaise = mouthInt.LipUpperLeftRaise;
-
-			mouth.MouthRightSmileFrown = mouthInt.MouthRightSmileFrown;
-			mouth.MouthLeftSmileFrown = mouthInt.MouthLeftSmileFrown;
-			mouth.CheekLeftPuffSuck = mouthInt.CheekLeftPuffSuck;
-			mouth.CheekRightPuffSuck = mouthInt.CheekRightPuffSuck;
 
 		}
 	}

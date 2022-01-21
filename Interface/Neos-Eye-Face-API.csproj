@@ -34,30 +34,37 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>G:\Steam\steamapps\common\NeosVR\0Harmony.dll</HintPath>
+      <HintPath>J:\SteamLibrary\steamapps\common\NeosVR\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="BaseX, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>G:\Steam\steamapps\common\NeosVR\Neos_Data\Managed\BaseX.dll</HintPath>
+      <HintPath>J:\SteamLibrary\steamapps\common\NeosVR\Neos_Data\Managed\BaseX.dll</HintPath>
     </Reference>
     <Reference Include="FrooxEngine, Version=2021.10.26.9, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>G:\Steam\steamapps\common\NeosVR\Neos_Data\Managed\FrooxEngine.dll</HintPath>
+      <HintPath>J:\SteamLibrary\steamapps\common\NeosVR\Neos_Data\Managed\FrooxEngine.dll</HintPath>
     </Reference>
     <Reference Include="NeosModLoader">
-      <HintPath>G:\Steam\steamapps\common\NeosVR\Libraries\NeosModLoader.dll</HintPath>
+      <HintPath>J:\SteamLibrary\steamapps\common\NeosVR\Libraries\NeosModLoader.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />
-    <Reference Include="websocket-sharp">
-      <HintPath>WCFace\websocket-sharp.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Neos-Eye-Face-API.cs" />
+    <Compile Include="Neos-Tobii-Eye.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Mouth\MouthInterface.cs" />
-    <Compile Include="Eye\EyeInterface.cs" />
+    <Compile Include="Tobii\API\Internal\TobiiXR_Lifecycle.cs" />
+    <Compile Include="Tobii\API\Internal\TobiiXR_Settings.cs" />
+    <Compile Include="Tobii\API\TobiiXR.cs" />
+    <Compile Include="Tobii\API\TobiiXR_Initializer.cs" />
+    <Compile Include="Tobii\Core\EyeTrackingFilterBase.cs" />
+    <Compile Include="Tobii\Core\IEyeTrackingProvider.cs" />
+    <Compile Include="Tobii\Core\Providers\EyeTrackingDataHelper.cs" />
+    <Compile Include="Tobii\Core\Providers\NoseDirectionProvider.cs" />
+    <Compile Include="Tobii\Core\Providers\TobiiProvider.cs" />
+    <Compile Include="Tobii\Core\TobiiXR_EyeTrackingData.cs" />
+    <Compile Include="Tobii\Core\TobiiXR_TrackingSpace.cs" />
+    <Compile Include="Tobii\G2OM\Scripts\G2OM.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -65,6 +72,6 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetDir)\$(TargetFileName)" "G:\Steam\steamapps\common\NeosVR\nml_mods"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetDir)\$(TargetFileName)" "J:\SteamLibrary\steamapps\common\NeosVR\nml_mods"</PostBuildEvent>
   </PropertyGroup>
 </Project>
