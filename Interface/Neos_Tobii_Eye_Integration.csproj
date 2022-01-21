@@ -7,12 +7,14 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NeosWCFaceIntegration</RootNamespace>
-    <AssemblyName>NeosWCFaceIntegration</AssemblyName>
+    <AssemblyName>Neos_Tobii_Eye_Integration</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
     <ProjectGuid>{0322B2EF-7452-479D-BAE2-FCAB75033337}</ProjectGuid>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -49,22 +51,13 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />
+    <Reference Include="Tobii.Research, Version=1.9.0.1198, Culture=neutral, PublicKeyToken=70326046dcdce6cb, processorArchitecture=AMD64">
+      <HintPath>..\packages\Tobii.Research.x64.1.9.0.1198\lib\netstandard2.0\Tobii.Research.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Neos-Tobii-Eye.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tobii\API\Internal\TobiiXR_Lifecycle.cs" />
-    <Compile Include="Tobii\API\Internal\TobiiXR_Settings.cs" />
-    <Compile Include="Tobii\API\TobiiXR.cs" />
-    <Compile Include="Tobii\API\TobiiXR_Initializer.cs" />
-    <Compile Include="Tobii\Core\EyeTrackingFilterBase.cs" />
-    <Compile Include="Tobii\Core\IEyeTrackingProvider.cs" />
-    <Compile Include="Tobii\Core\Providers\EyeTrackingDataHelper.cs" />
-    <Compile Include="Tobii\Core\Providers\NoseDirectionProvider.cs" />
-    <Compile Include="Tobii\Core\Providers\TobiiProvider.cs" />
-    <Compile Include="Tobii\Core\TobiiXR_EyeTrackingData.cs" />
-    <Compile Include="Tobii\Core\TobiiXR_TrackingSpace.cs" />
-    <Compile Include="Tobii\G2OM\Scripts\G2OM.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -74,4 +67,11 @@
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetDir)\$(TargetFileName)" "J:\SteamLibrary\steamapps\common\NeosVR\nml_mods"</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\Tobii.Research.x64.1.9.0.1198\build\netstandard2.0\Tobii.Research.x64.targets" Condition="Exists('..\packages\Tobii.Research.x64.1.9.0.1198\build\netstandard2.0\Tobii.Research.x64.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Tobii.Research.x64.1.9.0.1198\build\netstandard2.0\Tobii.Research.x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tobii.Research.x64.1.9.0.1198\build\netstandard2.0\Tobii.Research.x64.targets'))" />
+  </Target>
 </Project>
