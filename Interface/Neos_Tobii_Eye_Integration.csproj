@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NeosWCFaceIntegration</RootNamespace>
-    <AssemblyName>Neos_Tobii_Eye_Integration</AssemblyName>
+    <RootNamespace>Neos_Tobii_Eye_Integration</RootNamespace>
+    <AssemblyName>alpha_Neos_Tobii_Eye_Integration</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -58,7 +58,6 @@
   <ItemGroup>
     <Compile Include="Neos-Tobii-Eye.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TobiiNeos.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -12,7 +12,10 @@ namespace Neos_Tobii_Eye_Integration
 {
 	public class Neos_Tobii_Eye : NeosMod
 	{
-		public static TobiiNeos eyeTracker;
+		// TODO
+		// Expose EyeTrackingOperations as *juicy* config vars
+
+		public static IEyeTracker eyeTracker;
 
 		public static bool leftIsValid;
 		public static float leftBlink;
@@ -30,56 +33,103 @@ namespace Neos_Tobii_Eye_Integration
 
 		public override string Name => "Neos-Tobii-Eye-Integration";
 		public override string Author => "dfgHiatus";
-		public override string Version => "1.0.0";
+		public override string Version => "alpha-1.0.2";
 		public override string Link => "https://github.com/dfgHiatus/Neos-Tobii-Eye-Tracker-Integration";
 
 		public override void OnEngineInit()
 		{
-			// Harmony.DEBUG = true;
-			if (eyeTracker != null)
+			try 
 			{
-				CallEyeTrackerManager(eyeTracker);
-				eyeTracker.GazeDataReceived += EyeTracker_GazeDataReceived;
-			}
+				// Harmony.DEBUG = true;
+
+				// Assuming there is only one Tobii device connected, this should suffice
+				// Alt: var eyeTrackerList = EyeTrackingOperations.FindAllEyeTrackersAsync();
+				var eyeTrackerList = EyeTrackingOperations.FindAllEyeTrackers(); 
+				eyeTracker = eyeTrackerList.FirstOrDefault();
+
+				if (eyeTracker != null)
+				{
+					// Attempt to initiallize the eye tracking MANAGER if the device supports it
+					// This isn't needed to get eye tracking to work, but it is helpful
+					// IIRC this doesn't work for VR Devices
+					CallEyeTrackerManager(eyeTracker);
+					eyeTracker.HMDGazeDataReceived += EyeTracker_HMDGazeDataReceived;
+					eyeTracker.ConnectionLost += EyeTracker_ConnectionLost;
+					eyeTracker.ConnectionRestored += EyeTracker_ConnectionRestored;
+					Debug(String.Format("Tobii eye tracker connected with the following stats: \n" +
+										"Firmware Version {0}\n" +
+										"Model {1}\n" +
+										"Serial Number {2}\n" +
+										"DeviceName {3}\n" +
+										"Operating Address {4}\n" +
+										"RuntimeVersion {5}\n",
+										eyeTracker.FirmwareVersion,
+										eyeTracker.Model,
+										eyeTracker.SerialNumber,
+										eyeTracker.DeviceName,
+										eyeTracker.Address.ToString(),
+										eyeTracker.RuntimeVersion)
+						);
+				}
+				else
+				{
+					Warn("No Tobii eye tracker was found. Tobii eye tracking will be unavalible for this session.");
+				}
+            }
+			catch (Exception e)
+            {
+				Error("An error occured when trying to initiallie Tobii Eye Tracking.");
+				Error(e.Message);
+            }
 
 			Harmony harmony = new Harmony("net.dfgHiatus.Neos-Tobii-Eye-Integration");
 			harmony.PatchAll();
 		}
 
-		private static void EyeTracker_GazeDataReceived(object sender, GazeDataEventArgs e)
+		public static void EyeTracker_ConnectionLost(object sender, ConnectionLostEventArgs e)
+        {
+			Debug("Connection was lost to the Tobii eye tracking service.");
+        }
+
+		public static void EyeTracker_ConnectionRestored(object sender, ConnectionRestoredEventArgs e)
+        {
+			Debug("Connection was restored to the Tobii eye tracking service.");
+        }
+
+		private static void EyeTracker_HMDGazeDataReceived(object sender, HMDGazeDataEventArgs e)
 		{
-			// TODO check if both are valid?
+			// TODO Check if both are valid post debugging
 
 			leftIsValid = e.LeftEye.GazeOrigin.Validity == Validity.Valid;
 			leftBlink = e.LeftEye.GazeOrigin.Validity == Validity.Valid ? 1f : 0f;
 			leftRawPupil = e.LeftEye.Pupil.PupilDiameter;
 
-			if (e.LeftEye.GazeOrigin.Validity == Validity.Valid && e.LeftEye.GazePoint.Validity == Validity.Valid)
+			if (e.LeftEye.GazeOrigin.Validity == Validity.Valid && e.LeftEye.GazeDirection.Validity == Validity.Valid)
             {
 				leftRawPos = new float3(
-					e.LeftEye.GazeOrigin.PositionInUserCoordinates.X,
-					e.LeftEye.GazeOrigin.PositionInUserCoordinates.Y,
-					e.LeftEye.GazeOrigin.PositionInUserCoordinates.Z);
+					e.LeftEye.GazeOrigin.PositionInHMDCoordinates.X,
+					e.LeftEye.GazeOrigin.PositionInHMDCoordinates.Y,
+					e.LeftEye.GazeOrigin.PositionInHMDCoordinates.Z);
 				leftRawRot = new float3(
-					e.LeftEye.GazePoint.PositionInUserCoordinates.X,
-					e.LeftEye.GazePoint.PositionInUserCoordinates.Y,
-					e.LeftEye.GazePoint.PositionInUserCoordinates.Z);
+					e.LeftEye.GazeDirection.UnitVector.X,
+					e.LeftEye.GazeDirection.UnitVector.Y,
+					e.LeftEye.GazeDirection.UnitVector.Z);
 			}
 
 			rightIsValid = e.RightEye.GazeOrigin.Validity == Validity.Valid;
 			rightBlink = e.RightEye.GazeOrigin.Validity == Validity.Valid ? 1f : 0f;
 			rightRawPupil = e.RightEye.Pupil.PupilDiameter;
 
-			if (e.RightEye.GazeOrigin.Validity == Validity.Valid && e.RightEye.GazePoint.Validity == Validity.Valid)
+			if (e.RightEye.GazeOrigin.Validity == Validity.Valid && e.RightEye.GazeDirection.Validity == Validity.Valid)
 			{
 				rightRawPos = new float3(
-					e.RightEye.GazeOrigin.PositionInUserCoordinates.X,
-					e.RightEye.GazeOrigin.PositionInUserCoordinates.Y,
-					e.RightEye.GazeOrigin.PositionInUserCoordinates.Z);
+					e.RightEye.GazeOrigin.PositionInHMDCoordinates.X,
+					e.RightEye.GazeOrigin.PositionInHMDCoordinates.Y,
+					e.RightEye.GazeOrigin.PositionInHMDCoordinates.Z);
 				rightRawRot = new float3(
-					e.RightEye.GazePoint.PositionInUserCoordinates.X,
-					e.RightEye.GazePoint.PositionInUserCoordinates.Y,
-					e.RightEye.GazePoint.PositionInUserCoordinates.Z);
+					e.RightEye.GazeDirection.UnitVector.X,
+					e.RightEye.GazeDirection.UnitVector.Y,
+					e.RightEye.GazeDirection.UnitVector.Z);
 			}
 
 			timestamp = e.DeviceTimeStamp;
@@ -139,7 +189,10 @@ namespace Neos_Tobii_Eye_Integration
 			{
 				if (eyeTracker != null)
 				{
-					eyeTracker.GazeDataReceived -= EyeTracker_GazeDataReceived;
+					eyeTracker.HMDGazeDataReceived -= EyeTracker_HMDGazeDataReceived;
+					eyeTracker.ConnectionLost -= EyeTracker_ConnectionLost;
+					eyeTracker.ConnectionRestored -= EyeTracker_ConnectionRestored;
+					EyeTrackingOperations.Terminate();
 				}
 				return true;
 			}
