@@ -28,7 +28,7 @@ namespace Neos_OpenSeeFace_Integration
 		public override string Name => "Neos-Tobii-Eye-Integration";
 		public override string Author => "dfgHiatus";
 		public override string Version => "1.0.0";
-		public override string Link => "https://github.com/dfgHiatus/Neos-Eye-Face-API/";
+		public override string Link => "https://github.com/dfgHiatus/Neos-Tobii-Eye-Tracker-Integration";
 		public override void OnEngineInit()
 		{
 			// Harmony.DEBUG = true;
@@ -116,19 +116,20 @@ namespace Neos_OpenSeeFace_Integration
 		public void CollectDeviceInfos(BaseX.DataTreeList list)
 		{
 			DataTreeDictionary EyeDataTreeDictionary = new DataTreeDictionary();
-			EyeDataTreeDictionary.Add("Name", "Generic Eye Tracking");
+			EyeDataTreeDictionary.Add("Name", "Tobii Eye Tracking");
 			EyeDataTreeDictionary.Add("Type", "Eye Tracking");
-			EyeDataTreeDictionary.Add("Model", "Generic Eye Model");
+			EyeDataTreeDictionary.Add("Model", "Vive Eye Devkit");
 			list.Add(EyeDataTreeDictionary);
 		}
 
 		public void RegisterInputs(InputInterface inputInterface)
 		{
-			eyes = new Eyes(inputInterface, "Generic Eye Tracking");
+			eyes = new Eyes(inputInterface, "Tobii Eye Tracking");
 		}
 
 		public void UpdateInputs(float deltaTime)
 		{
+			eyes.IsEyeTrackingActive = Engine.Current.InputInterface.VR_Active;
 			eyes.LeftEye.IsDeviceActive = Engine.Current.InputInterface.VR_Active;
 			eyes.RightEye.IsDeviceActive = Engine.Current.InputInterface.VR_Active;
 			eyes.CombinedEye.IsDeviceActive = Engine.Current.InputInterface.VR_Active;
