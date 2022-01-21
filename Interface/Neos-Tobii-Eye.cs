@@ -58,13 +58,13 @@ namespace Neos_Tobii_Eye_Integration
 					eyeTracker.HMDGazeDataReceived += EyeTracker_HMDGazeDataReceived;
 					eyeTracker.ConnectionLost += EyeTracker_ConnectionLost;
 					eyeTracker.ConnectionRestored += EyeTracker_ConnectionRestored;
-					Debug(String.Format("Tobii eye tracker connected with the following stats: \n" +
+					Debug(string.Format("Tobii eye tracker connected with the following stats: \n" +
 										"Firmware Version {0}\n" +
 										"Model {1}\n" +
 										"Serial Number {2}\n" +
-										"DeviceName {3}\n" +
+										"Device Name {3}\n" +
 										"Operating Address {4}\n" +
-										"RuntimeVersion {5}\n",
+										"Runtime Version {5}\n",
 										eyeTracker.FirmwareVersion,
 										eyeTracker.Model,
 										eyeTracker.SerialNumber,
@@ -75,7 +75,7 @@ namespace Neos_Tobii_Eye_Integration
 				}
 				else
 				{
-					Warn("No Tobii eye tracker was found. Tobii eye tracking will be unavalible for this session.");
+					Warn("No Tobii eye tracker was found. Tobii eye tracking will be unavailble for this session.");
 				}
             }
 			catch (ReflectionTypeLoadException)
@@ -168,7 +168,7 @@ namespace Neos_Tobii_Eye_Integration
 				int exitCode = etmProcess.ExitCode;
 				if (exitCode == 0)
 				{
-					Debug("Eye Tracker Manager was called successfully!");
+					Debug("Eye Tracker Manager was called successfully");
 				}
 				else
 				{
@@ -184,7 +184,8 @@ namespace Neos_Tobii_Eye_Integration
 			}
 			catch (Exception e)
 			{
-				Warn(e.Message);
+				Error("An unexpected error occured when trying to initiallize the Tobii Eye Manager.");
+				Error(e.Message);
 			}
 		}
 
