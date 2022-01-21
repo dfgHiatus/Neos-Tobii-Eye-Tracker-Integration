@@ -7,6 +7,7 @@ using Tobii.Research;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 
 namespace Neos_Tobii_Eye_Integration
 {
@@ -77,9 +78,13 @@ namespace Neos_Tobii_Eye_Integration
 					Warn("No Tobii eye tracker was found. Tobii eye tracking will be unavalible for this session.");
 				}
             }
+			catch (ReflectionTypeLoadException)
+			{
+				Error("Couldn't find the Tobii DLLs in the Neos base directory. Please check that Tobii.Research.dll, tobii_pro.dll, and tobii_firmware_upgrade.dll are present.");
+			}
 			catch (Exception e)
             {
-				Error("An error occured when trying to initiallie Tobii Eye Tracking.");
+				Error("An unexpected error occured when trying to initiallie Tobii Eye Tracking.");
 				Error(e.Message);
             }
 
