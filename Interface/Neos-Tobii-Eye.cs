@@ -14,6 +14,7 @@ namespace Neos_Tobii_Eye_Integration
 	{
 		// TODO
 		// Expose EyeTrackingOperations as *juicy* config vars
+		// Possibly add calibration?
 
 		public static IEyeTracker eyeTracker;
 
