@@ -4,12 +4,15 @@ using FrooxEngine;
 using BaseX;
 using System;
 using Tobii.Research;
+using System.IO;
+using System.Diagnostics;
+using System.Linq;
 
-namespace Neos_OpenSeeFace_Integration
+namespace Neos_Tobii_Eye_Integration
 {
 	public class Neos_Tobii_Eye : NeosMod
 	{
-		public static IEyeTracker eyeTracker;
+		public static TobiiNeos eyeTracker;
 
 		public static bool leftIsValid;
 		public static float leftBlink;
@@ -29,10 +32,16 @@ namespace Neos_OpenSeeFace_Integration
 		public override string Author => "dfgHiatus";
 		public override string Version => "1.0.0";
 		public override string Link => "https://github.com/dfgHiatus/Neos-Tobii-Eye-Tracker-Integration";
+
 		public override void OnEngineInit()
 		{
 			// Harmony.DEBUG = true;
-			eyeTracker.GazeDataReceived += EyeTracker_GazeDataReceived;
+			if (eyeTracker != null)
+			{
+				CallEyeTrackerManager(eyeTracker);
+				eyeTracker.GazeDataReceived += EyeTracker_GazeDataReceived;
+			}
+
 			Harmony harmony = new Harmony("net.dfgHiatus.Neos-Tobii-Eye-Integration");
 			harmony.PatchAll();
 		}
@@ -77,12 +86,61 @@ namespace Neos_OpenSeeFace_Integration
 
 		}
 
+		private static void CallEyeTrackerManager(IEyeTracker eyeTracker)
+		{
+			string etmStartupMode = "displayarea";
+			string etmBasePath = Path.GetFullPath(Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"),
+																"TobiiProEyeTrackerManager"));
+			string appFolder = Directory.EnumerateDirectories(etmBasePath, "app*").FirstOrDefault();
+			string executablePath = Path.GetFullPath(Path.Combine(etmBasePath,
+																	appFolder,
+																	"TobiiProEyeTrackerManager.exe"));
+			string arguments = "--device-address=" + eyeTracker.Address + " --mode=" + etmStartupMode;
+			try
+			{
+				Process etmProcess = new Process();
+				// Redirect the output stream of the child process.
+				etmProcess.StartInfo.UseShellExecute = false;
+				etmProcess.StartInfo.RedirectStandardError = true;
+				etmProcess.StartInfo.RedirectStandardOutput = true;
+				etmProcess.StartInfo.FileName = executablePath;
+				etmProcess.StartInfo.Arguments = arguments;
+				etmProcess.Start();
+				string stdOutput = etmProcess.StandardOutput.ReadToEnd();
+
+				etmProcess.WaitForExit();
+				int exitCode = etmProcess.ExitCode;
+				if (exitCode == 0)
+				{
+					Debug("Eye Tracker Manager was called successfully!");
+				}
+				else
+				{
+					Warn("Eye Tracker Manager call returned the error code: {0}", exitCode);
+					foreach (string line in stdOutput.Split(Environment.NewLine.ToCharArray()))
+					{
+						if (line.StartsWith("ETM Error:"))
+						{
+							Error(line);
+						}
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Warn(e.Message);
+			}
+		}
+
 		[HarmonyPatch(typeof(Engine), "Shutdown")]
 		public class ShutdownPatch
 		{
 			public static bool Prefix()
 			{
-				eyeTracker.GazeDataReceived -= EyeTracker_GazeDataReceived;
+				if (eyeTracker != null)
+				{
+					eyeTracker.GazeDataReceived -= EyeTracker_GazeDataReceived;
+				}
 				return true;
 			}
 		}

@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Neos-Tobii-Eye.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TobiiNeos.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
