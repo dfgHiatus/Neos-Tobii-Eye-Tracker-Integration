@@ -35,7 +35,7 @@ namespace Neos_Tobii_Eye_Integration
 
 		public override string Name => "Neos-Tobii-Eye-Integration";
 		public override string Author => "dfgHiatus";
-		public override string Version => "alpha-1.0.2";
+		public override string Version => "alpha-1.0.3";
 		public override string Link => "https://github.com/dfgHiatus/Neos-Tobii-Eye-Tracker-Integration";
 
 		public override void OnEngineInit()
@@ -54,7 +54,7 @@ namespace Neos_Tobii_Eye_Integration
 					// Attempt to initiallize the eye tracking MANAGER if the device supports it
 					// This isn't needed to get eye tracking to work, but it is helpful
 					// IIRC this doesn't work for VR Devices
-					CallEyeTrackerManager(eyeTracker);
+					// CallEyeTrackerManager(eyeTracker);
 					eyeTracker.HMDGazeDataReceived += EyeTracker_HMDGazeDataReceived;
 					eyeTracker.ConnectionLost += EyeTracker_ConnectionLost;
 					eyeTracker.ConnectionRestored += EyeTracker_ConnectionRestored;
@@ -87,9 +87,11 @@ namespace Neos_Tobii_Eye_Integration
 				Error("An unexpected error occured when trying to initiallize Tobii Eye Tracking.");
 				Error(e.Message);
             }
-
-			Harmony harmony = new Harmony("net.dfgHiatus.Neos-Tobii-Eye-Integration");
-			harmony.PatchAll();
+			finally
+            {
+				Harmony harmony = new Harmony("net.dfgHiatus.Neos-Tobii-Eye-Integration");
+				harmony.PatchAll();
+			}
 		}
 
 		public static void EyeTracker_ConnectionLost(object sender, ConnectionLostEventArgs e)
@@ -142,7 +144,7 @@ namespace Neos_Tobii_Eye_Integration
 
 		}
 
-		private static void CallEyeTrackerManager(IEyeTracker eyeTracker)
+		/*private static void CallEyeTrackerManager(IEyeTracker eyeTracker)
 		{
 			string etmStartupMode = "displayarea";
 			string etmBasePath = Path.GetFullPath(Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"),
@@ -187,7 +189,7 @@ namespace Neos_Tobii_Eye_Integration
 				Error("An unexpected error occured when trying to initiallize the Tobii Eye Manager.");
 				Error(e.Message);
 			}
-		}
+		}*/
 
 		[HarmonyPatch(typeof(Engine), "Shutdown")]
 		public class ShutdownPatch
