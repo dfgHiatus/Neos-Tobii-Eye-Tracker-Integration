@@ -47,7 +47,7 @@ namespace Neos_Tobii_Eye_Integration
 
 				// Assuming there is only one Tobii device connected, this should suffice
 				// Alt: var eyeTrackerList = EyeTrackingOperations.FindAllEyeTrackersAsync();
-				var eyeTrackerList = EyeTrackingOperations.FindAllEyeTrackers(); 
+				var eyeTrackerList = EyeTrackingOperations.FindAllEyeTrackers();
 				eyeTracker = eyeTrackerList.FirstOrDefault();
 
 				if (eyeTracker != null)
@@ -312,7 +312,7 @@ namespace Neos_Tobii_Eye_Integration
 			}
 			else
 			{
-				eyes.IsEyeTrackingActive = Engine.Current.InputInterface.VR_Active && Neos_Tobii_Eye.usingTobiiScreen;
+				eyes.IsEyeTrackingActive = Engine.Current.InputInterface.VR_Active;
 				eyes.LeftEye.IsDeviceActive = Engine.Current.InputInterface.VR_Active;
 				eyes.RightEye.IsDeviceActive = Engine.Current.InputInterface.VR_Active;
 				eyes.CombinedEye.IsDeviceActive = Engine.Current.InputInterface.VR_Active;
