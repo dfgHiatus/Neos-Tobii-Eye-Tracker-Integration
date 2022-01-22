@@ -342,7 +342,7 @@ namespace Neos_Tobii_Eye_Integration
 
 			eyes.LeftEye.PupilDiameter = Neos_Tobii_Eye.leftRawPupil;
 			eyes.RightEye.PupilDiameter = Neos_Tobii_Eye.rightRawPupil;
-			eyes.CombinedEye.PupilDiameter = MathX.Average(Neos_Tobii_Eye.leftRawPupil + Neos_Tobii_Eye.rightRawPupil);
+			eyes.CombinedEye.PupilDiameter = MathX.Average(Neos_Tobii_Eye.leftRawPupil, Neos_Tobii_Eye.rightRawPupil);
 
 		}
 	}
