@@ -56,7 +56,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Neos_Tobii_Eye_VR.cs" />
+    <Compile Include="Helpers\TobiiScreen.cs" />
+    <Compile Include="Helpers\TobiiVR.cs" />
+    <Compile Include="Neos_Tobii_Eye.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
