@@ -52,12 +52,14 @@
     <Reference Include="System" />
     <Reference Include="System.Numerics" />
     <Reference Include="Tobii.Research, Version=1.9.0.1198, Culture=neutral, PublicKeyToken=70326046dcdce6cb, processorArchitecture=AMD64">
-      <HintPath>..\packages\Tobii.Research.x64.1.9.0.1198\lib\netstandard2.0\Tobii.Research.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\TobiiNET\TobiiPro\Tobii.Research.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Neos_Tobii_Eye.cs" />
+    <Compile Include="NeosTobiiEye.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TobiiProTrackingInterface.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -67,11 +69,4 @@
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetDir)\$(TargetFileName)" "J:\SteamLibrary\steamapps\common\NeosVR\nml_mods"</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Tobii.Research.x64.1.9.0.1198\build\netstandard2.0\Tobii.Research.x64.targets" Condition="Exists('..\packages\Tobii.Research.x64.1.9.0.1198\build\netstandard2.0\Tobii.Research.x64.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Tobii.Research.x64.1.9.0.1198\build\netstandard2.0\Tobii.Research.x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tobii.Research.x64.1.9.0.1198\build\netstandard2.0\Tobii.Research.x64.targets'))" />
-  </Target>
 </Project>
