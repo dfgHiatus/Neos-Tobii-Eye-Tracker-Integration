@@ -67,13 +67,13 @@ namespace NeosTobiiEyeIntegration
 
 					tobiiProTrackingInterface.eyeTracker.ConnectionLost += TobiiProTrackingInterface.EyeTracker_ConnectionLost;
 					tobiiProTrackingInterface.eyeTracker.ConnectionRestored += TobiiProTrackingInterface.EyeTracker_ConnectionRestored;
-					Debug(string.Format("Tobii eye tracker connected with the following stats: \n" +
-										"Firmware Version {0}\n" +
-										"Model {1}\n" +
-										"Serial Number {2}\n" +
-										"Device Name {3}\n" +
-										"Operating Address {4}\n" +
-										"Runtime Version {5}\n",
+					Debug(string.Format("Tobii eye tracker connected with the following stats - \n" +
+										"Firmware Version: {0}\n" +
+										"Model: {1}\n" +
+										"Serial Number: {2}\n" +
+										"Device Name: {3}\n" +
+										"Operating Address: {4}\n" +
+										"Runtime Version: {5}\n",
 										tobiiProTrackingInterface.eyeTracker.FirmwareVersion,
 										tobiiProTrackingInterface.eyeTracker.Model,
 										tobiiProTrackingInterface.eyeTracker.SerialNumber,
