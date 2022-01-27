@@ -57,11 +57,13 @@ namespace NeosTobiiEyeIntegration
 					if (usingTobiiScreen)
                     {
 						tobiiProTrackingInterface.eyeTracker.GazeDataReceived += TobiiProTrackingInterface.Screen_OnGazeDataReceived;
-					}
+                        Debug("Initializing Tobii Eye Tracking in Screen Mode...");
+                    }
 					else
                     {
 						tobiiProTrackingInterface.eyeTracker.HMDGazeDataReceived += TobiiProTrackingInterface.HMD_OnGazeDataReceived;
-					}
+                        Debug("Initializing Tobii Eye Tracking in VR Mode...");
+                    }
 
 					tobiiProTrackingInterface.eyeTracker.ConnectionLost += TobiiProTrackingInterface.EyeTracker_ConnectionLost;
 					tobiiProTrackingInterface.eyeTracker.ConnectionRestored += TobiiProTrackingInterface.EyeTracker_ConnectionRestored;
@@ -100,14 +102,6 @@ namespace NeosTobiiEyeIntegration
             }
 			finally
             {
-                if (usingTobiiScreen)
-                {
-                    Debug("Starting Tobii Eye Tracking in Screen Mode");
-                }
-                else
-                {
-                    Debug("Starting Tobii Eye Tracking in VR Mode");
-                }
 				Harmony harmony = new Harmony("net.dfgHiatus.Neos-Tobii-Eye-Integration");
 				harmony.PatchAll();
 			}
