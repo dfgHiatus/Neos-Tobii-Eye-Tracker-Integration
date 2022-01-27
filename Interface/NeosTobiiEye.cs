@@ -100,6 +100,14 @@ namespace NeosTobiiEyeIntegration
             }
 			finally
             {
+                if (usingTobiiScreen)
+                {
+                    Debug("Starting Tobii Eye Tracking in Screen Mode");
+                }
+                else
+                {
+                    Debug("Starting Tobii Eye Tracking in VR Mode");
+                }
 				Harmony harmony = new Harmony("net.dfgHiatus.Neos-Tobii-Eye-Integration");
 				harmony.PatchAll();
 			}
@@ -464,8 +472,7 @@ namespace NeosTobiiEyeIntegration
 
 			eyes.LeftEye.Squeeze = 0f;
 			eyes.RightEye.Squeeze = 0f;
-			eyes.RightEye.Squeeze = 0f;
-			eyes.RightEye.Squeeze = 0f;
+			eyes.CombinedEye.Squeeze = 0f;
 
 			eyes.LeftEye.Widen = 0f;
 			eyes.RightEye.Widen = 0f;
