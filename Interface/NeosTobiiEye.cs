@@ -40,7 +40,7 @@ namespace NeosTobiiEyeIntegration
 
 		public override string Name => "Neos-Tobii-Eye-Integration";
 		public override string Author => "dfgHiatus";
-		public override string Version => "alpha-1.0.4";
+		public override string Version => "alpha-1.0.6";
 		public override string Link => "https://github.com/dfgHiatus/Neos-Tobii-Eye-Tracker-Integration";
 
 		public override void OnEngineInit()
