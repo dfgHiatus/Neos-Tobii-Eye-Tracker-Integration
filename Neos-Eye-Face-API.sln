@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeosTobiiEyeIntegration", "TobiiEyeTracking\NeosTobiiEyeIntegration.csproj", "{0322B2EF-7452-479D-BAE2-FCAB75033337}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeosTobiiEyeIntegrationScreen", "TobiiEyeTracking\NeosTobiiEyeIntegrationScreen.csproj", "{0322B2EF-7452-479D-BAE2-FCAB75033337}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TobiiEyeClassLibVR", "..\TobiiEyeClassLib\TobiiEyeClassLib\TobiiEyeClassLibVR.csproj", "{0518A9CD-2DEF-41A2-8725-81CF71F21C5F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TobiiEyeTestVR", "..\TobiiEyeTest\TobiiEyeTest\TobiiEyeTestVR.csproj", "{D33B9130-D7AB-4C97-B1EC-9C01DCBFA62A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TobiiEyeTestScreen", "TobiiEyeTestScreen\TobiiEyeTestScreen.csproj", "{A8AA7734-2D92-4561-9AD1-D8CE3A1FA265}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TobiiEyeTestScreen", "TobiiEyeTestScreen\TobiiEyeTestScreen.csproj", "{A8AA7734-2D92-4561-9AD1-D8CE3A1FA265}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
