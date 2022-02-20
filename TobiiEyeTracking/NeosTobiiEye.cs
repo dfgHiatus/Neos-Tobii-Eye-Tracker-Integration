@@ -70,6 +70,11 @@ namespace NeosTobiiEyeIntegration
 				Debug($"Screen mode initiallized!");
 
 				Native.Tobii_get_device_info(tobiiDevice, ref tobiiDeviceInfo);
+				Debug($"Device stats: " +
+$"Firmware Version: {tobiiDeviceInfo.firmware_version}" +
+$"Model: {tobiiDeviceInfo.model}" +
+$"Runtime Build Version: {tobiiDeviceInfo.runtime_build_version}" +
+$"Serial Number: {tobiiDeviceInfo.serial_number}");
 			}
 			catch (Exception e)
 			{
@@ -117,12 +122,6 @@ namespace NeosTobiiEyeIntegration
 			{
 				try
 				{
-					Debug($"Device stats: " +
-	$"Firmware Version: {tobiiDeviceInfo.firmware_version}" +
-	$"Model: {tobiiDeviceInfo.model}" +
-	$"Runtime Build Version: {tobiiDeviceInfo.runtime_build_version}" +
-	$"Serial Number: {tobiiDeviceInfo.serial_number}");
-
 					GenericInputDevice gen = new GenericInputDevice();
 					Debug("Module Name: " + gen.ToString());
 					__instance.RegisterInputDriver(gen);
