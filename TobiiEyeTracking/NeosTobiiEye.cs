@@ -3,21 +3,31 @@ using NeosModLoader;
 using FrooxEngine;
 using BaseX;
 using System;
-using TobiiEyeScreen;
-using TobiiEyeVR;
+using TobiiEyeBridge;
 
 namespace NeosTobiiEyeIntegration
 {
 	public class NeosTobiiEye : NeosMod
 	{
-		public static bool isScreen = true; // Make config
-		public static TobiiScreen tobiiScreen;
+		// Make config
+		//[AutoRegisterConfigKey]
+		//private readonly ModConfigurationKey<bool> IS_SCREEN = new ModConfigurationKey<bool>("is_screen", "Whether Tobii Eye Tracking is VR/Screen", internalAccessOnly: true);
+		public static bool isScreen = true; 
 
+		// Tobii
 		public static bool initialized = false;
-		public static bool running = true;
+		public static bool running = true;	
 		public static Native.Tobii_api_t tobiiAPI;
 		public static Native.Tobii_device_t tobiiDevice;
+		public static Native.Tobii_device_info_t tobiiDeviceInfo;
+
+		// VR
 		public static Native.Tobii_wearable_consumer_data_t eyeDataVR;
+
+		// Screen
+		public static Native.Tobii_gaze_point_t eyeDataScreenPoint;
+		public static Native.Tobii_gaze_origin_t eyeDataScreenOrigin;
+		public static bool isScreenUserPresent = true;
 
 		public override string Name => "Neos-Tobii-Eye-Integration";
 		public override string Author => "dfgHiatus";
@@ -28,31 +38,28 @@ namespace NeosTobiiEyeIntegration
 		{
 			try 
 			{
-				// Harmony.DEBUG = true;
-				if (isScreen)
+				Native.Tobii_api_create(out tobiiAPI, IntPtr.Zero, IntPtr.Zero);
+				Native.Tobii_enumerate_local_device_urls(tobiiAPI, setupDevice, IntPtr.Zero);
+				if (initialized == false)
 				{
-					tobiiScreen = new TobiiScreen();
-					tobiiScreen.Start();
+					Warn("No Tobii Eye Tracker was detected! Eye tracking will be unavailable for this session.");
 				}
 				else
 				{
-					Native.Tobii_api_create(out tobiiAPI, IntPtr.Zero, IntPtr.Zero);
-					Native.Tobii_enumerate_local_device_urls(tobiiAPI, setupVRDevice, IntPtr.Zero);
-				}		
-            }
+					Harmony harmony = new Harmony("net.dfgHiatus.Neos-Tobii-Eye-Integration");
+					harmony.PatchAll();
+				}
+
+
+			}
 			catch (Exception e)
             {
-				Warn("Tobii eye tracking will be unavailble for this session.");
+				Warn("An unexpected error occured during engine initialization.");
 				Error(e.Message);
             }
-			finally
-            {
-				Harmony harmony = new Harmony("net.dfgHiatus.Neos-Tobii-Eye-Integration");
-				harmony.PatchAll();
-			}
 		}
 
-		private static void setupVRDevice(string device, IntPtr intptr)
+		private static void setupDevice(string device, IntPtr intptr)
 		{
 			try
 			{
@@ -63,25 +70,50 @@ namespace NeosTobiiEyeIntegration
 				initialized = true;
 				Debug($"Establishing connection to {device}...");
 				Native.Tobii_device_create(tobiiAPI, device, Native.Tobii_field_of_use_t.FieldOfUseInteractive, out tobiiDevice);
-				Native.Tobii_wearable_consumer_data_subscribe(tobiiDevice, getData, IntPtr.Zero);
-				Debug($"Connected.");
+				if (isScreen)
+				{
+					Native.Tobii_gaze_point_subscribe(tobiiDevice, getEyeDataScreenPoint, IntPtr.Zero);
+					Native.Tobii_gaze_origin_subscribe(tobiiDevice, getEyeDataScreenOrigin, IntPtr.Zero);
+					Native.Tobii_user_presence_subscribe(tobiiDevice, isUserPresent, IntPtr.Zero);
+					Debug($"Screen mode initiallized!");
+				}
+				else
+				{
+					Native.Tobii_wearable_consumer_data_subscribe(tobiiDevice, getEyeDataVR, IntPtr.Zero);
+					Debug($"VR mode initiallized!");
+				}
+				Native.Tobii_get_device_info(tobiiDevice, ref tobiiDeviceInfo);
+				Debug($"Device stats: " +
+					$"Firmware Version: {tobiiDeviceInfo.firmware_version}" +
+					$"Model: {tobiiDeviceInfo.model}" +
+					$"Runtime Build Version: {tobiiDeviceInfo.runtime_build_version}" +
+					$"Serial Number: {tobiiDeviceInfo.serial_number}");
 			}
 			catch (Exception e)
 			{
+				Warn("An unexpected error occured during Tobii device setup.");
 				Error(e.Message);
 			}
 		}
 
-		private unsafe static void getData(in Native.Tobii_wearable_consumer_data_t data, IntPtr user_data)
+		private unsafe static void getEyeDataScreenOrigin(in Native.Tobii_gaze_origin_t data, IntPtr user_data)
 		{
-			try
-			{
-				eyeDataVR = data;
-			}
-			catch (Exception e)
-			{
-				Error(e.Message);
-			}
+			eyeDataScreenOrigin = data;
+		}
+
+		private unsafe static void getEyeDataScreenPoint(in Native.Tobii_gaze_point_t data, IntPtr user_data)
+		{
+			eyeDataScreenPoint = data;
+		}
+
+		private unsafe static void getEyeDataVR(in Native.Tobii_wearable_consumer_data_t data, IntPtr user_data)
+		{
+			eyeDataVR = data;
+		}
+
+		private unsafe static void isUserPresent(Native.Tobii_user_presence_status_t status, long timestamp_us, IntPtr user_data)
+		{
+			isScreenUserPresent = (status == Native.Tobii_user_presence_status_t.UserPresenceStatusAway);
 		}
 
 		[HarmonyPatch(typeof(Engine), "Shutdown")]
@@ -91,15 +123,14 @@ namespace NeosTobiiEyeIntegration
 			{
 				if (isScreen)
 				{
-					tobiiScreen.Stop();
+					Native.Tobii_gaze_origin_unsubscribe(tobiiDevice);
+					Native.Tobii_user_presence_unsubscribe(tobiiDevice);
 				}
-				else
-				{
-					Native.Tobii_wearable_consumer_data_unsubscribe(tobiiDevice);
-					Native.Tobii_device_destroy(tobiiDevice);
-					Native.Tobii_api_destroy(tobiiAPI);
-					running = false;
-				}
+
+				Native.Tobii_wearable_consumer_data_unsubscribe(tobiiDevice);
+				Native.Tobii_device_destroy(tobiiDevice);
+				Native.Tobii_api_destroy(tobiiAPI);
+				running = false;
 				return true;
 			}
 		}
@@ -147,42 +178,74 @@ namespace NeosTobiiEyeIntegration
 			{
 				if (isScreen)
 				{
-					eyes.LeftEye.IsTracking = !Engine.Current.InputInterface.VR_Active;
-					eyes.RightEye.IsTracking = !Engine.Current.InputInterface.VR_Active;
+					eyes.IsEyeTrackingActive = initialized && !Engine.Current.InputInterface.VR_Active;
 
-					eyes.Timestamp = tobiiScreen.eyeData["/timestamp"];
+					eyes.LeftEye.IsDeviceActive = initialized;
+					eyes.RightEye.IsDeviceActive = initialized;
+					eyes.CombinedEye.IsDeviceActive = initialized;
 
-					eyes.LeftEye.RawPosition = new float3(
-						tobiiScreen.eyeData["/eye/left/x"],
-						tobiiScreen.eyeData["/eye/left/y"],
-						tobiiScreen.eyeData["/eye/left/z"]);
+					eyes.LeftEye.IsTracking = isScreenUserPresent;
+					eyes.RightEye.IsTracking = isScreenUserPresent;
+					eyes.CombinedEye.IsTracking = isScreenUserPresent;
 
-					eyes.RightEye.RawPosition = new float3(
-						tobiiScreen.eyeData["/eye/right/x"],
-						tobiiScreen.eyeData["/eye/right/y"],
-						tobiiScreen.eyeData["/eye/right/z"]);
+					eyes.Timestamp = eyeDataScreenPoint.timestamp_us;
 
-					eyes.CombinedEye.RawPosition = new float3(
-						MathX.Average(tobiiScreen.eyeData["/eye/left/x"], tobiiScreen.eyeData["/eye/right/x"]),
-						MathX.Average(tobiiScreen.eyeData["/eye/left/y"], tobiiScreen.eyeData["/eye/right/y"]),
-						MathX.Average(tobiiScreen.eyeData["/eye/left/z"], tobiiScreen.eyeData["/eye/right/z"]));
+					var leftEyePos = new float3(
+						eyeDataScreenOrigin.left_xyz[0],
+						eyeDataScreenOrigin.left_xyz[1],
+						eyeDataScreenOrigin.left_xyz[2]);
+					var leftEyeDir = new float3(
+						eyeDataScreenPoint.position_xy[0],
+						eyeDataScreenPoint.position_xy[1],
+						0f);
+					eyes.LeftEye.RawPosition = leftEyePos;
+					eyes.LeftEye.Openness = (eyeDataScreenOrigin.left_validity == Native.Tobii_validity_t.ValidityValid) ? 1f : 0f;
+					// https://gamedev.stackexchange.com/questions/137305/need-help-with-getting-a-direction-vector-between-two-given-points
+					var leftDistance = leftEyeDir - leftEyePos;
+					eyes.LeftEye.Direction = leftDistance / leftDistance.Magnitude;
+
+					var rightEyePos = new float3(
+						eyeDataScreenOrigin.right_xyz[0],
+						eyeDataScreenOrigin.right_xyz[1],
+						eyeDataScreenOrigin.right_xyz[2]);
+					var rightEyeDir = new float3(
+						eyeDataScreenPoint.position_xy[0],
+						eyeDataScreenPoint.position_xy[1],
+						0f);
+					eyes.RightEye.RawPosition = rightEyePos;
+					eyes.RightEye.Openness = (eyeDataScreenOrigin.right_validity == Native.Tobii_validity_t.ValidityValid) ? 1f : 0f;
+					// https://gamedev.stackexchange.com/questions/137305/need-help-with-getting-a-direction-vector-between-two-given-points
+					var rightDistance = rightEyeDir - rightEyePos;
+					eyes.RightEye.Direction = rightDistance / rightDistance.Magnitude;
 				}
 				else
 				{
+					eyes.IsEyeTrackingActive = initialized && Engine.Current.InputInterface.VR_Active;
+
+					eyes.LeftEye.IsDeviceActive = initialized;
+					eyes.RightEye.IsDeviceActive = initialized;
+					eyes.CombinedEye.IsDeviceActive = initialized;
+
 					eyes.LeftEye.IsTracking = Engine.Current.InputInterface.VR_Active;
 					eyes.RightEye.IsTracking = Engine.Current.InputInterface.VR_Active;
-					eyes.CombinedEye.IsTracking = Engine.Current.InputInterface.VR_Active;
+					eyes.CombinedEye.IsTracking = eyeDataVR.gaze_origin_combined_validity == Native.Tobii_validity_t.ValidityValid;
 
 					eyes.LeftEye.Openness = (int) eyeDataVR.left.blink == 1 ? 1f : 0f;
 					eyes.RightEye.Openness = (int) eyeDataVR.right.blink == 1 ? 1f : 0f;
 					eyes.CombinedEye.Openness = (int) eyeDataVR.left.blink == 1 || (int)eyeDataVR.right.blink == 1 ? 1f : 0f;
 
-					eyes.CombinedEye.Direction = new float3(
+					eyes.CombinedEye.RawPosition = (eyeDataVR.gaze_origin_combined_validity == Native.Tobii_validity_t.ValidityValid) ? new float3(
+						eyeDataVR.gaze_origin_combined_mm_xyz[0],
+						eyeDataVR.gaze_origin_combined_mm_xyz[1],
+						eyeDataVR.gaze_origin_combined_mm_xyz[2]) : float3.Zero;
+
+					eyes.CombinedEye.Direction = (eyeDataVR.gaze_direction_combined_validity == Native.Tobii_validity_t.ValidityValid) ? new float3(
 						eyeDataVR.gaze_direction_combined_normalized_xyz[0],
 						eyeDataVR.gaze_direction_combined_normalized_xyz[1],
-						eyeDataVR.gaze_direction_combined_normalized_xyz[2]);
+						eyeDataVR.gaze_direction_combined_normalized_xyz[2]) : new float3(0, 0, 1);
 
-					eyes.ConvergenceDistance = (int) eyeDataVR.convergence_distance_validity == 1 ? eyeDataVR.convergence_distance_mm : 0f;
+					eyes.ConvergenceDistance = eyeDataVR.convergence_distance_validity == Native.Tobii_validity_t.ValidityValid
+						? eyeDataVR.convergence_distance_mm : 0f;
 					eyes.Timestamp = eyeDataVR.timestamp_us;
 				}
 			}

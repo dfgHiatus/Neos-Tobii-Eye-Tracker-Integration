@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Rug.Osc" Version="1.2.5" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\TobiiEyeClassLib\TobiiEyeClassLib\TobiiEyeClassLibVR.csproj" />
   </ItemGroup>
 

@@ -10,7 +10,7 @@ using System;
 
 // Custom Interop for invoking the Vive Eye
 
-namespace TobiiEyeVR
+namespace TobiiEyeBridge
 {
     using System.Runtime.InteropServices;
     

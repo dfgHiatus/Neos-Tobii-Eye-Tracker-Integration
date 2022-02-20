@@ -8,20 +8,7 @@ namespace TobiiEyeTestScreen
 {
     public class TobiiScreen
     {
-        public Dictionary<string, float> eyeData = new Dictionary<string, float>()
-        {
-            { "/eye/left/x", 0 },
-            { "/eye/left/y", 0 },
-            { "/eye/left/z", 0 },
-            { "/eye/right/x", 0 },
-            { "/eye/right/y", 0 },
-            { "eye/right/z", 0 },
-            { "/gaze/x", 0 },
-            { "/gaze/y", 0 },
-            { "/fixation/x", 0 },
-            { "/fixation/y", 0 },
-            { "/timestamp" , 0}
-        };
+        public float[] eyeData = new float[11];
 
         public UDPListener listener;
         public OscBundle messageReceived;
@@ -51,23 +38,24 @@ namespace TobiiEyeTestScreen
             {
                 messageReceived = (OscBundle)listener.Receive();
 
-                if (messageReceived != null)
+                try
                 {
-                    foreach (var msg in messageReceived.Messages) {
-
-                        // Console.WriteLine("Number of messages: " + messageReceived.Messages.Count);
-                        // Console.WriteLine(msg.Address.ToString());
-                        // Console.WriteLine((float) msg.Arguments[0]);
-
-                        // This should always contain the key. Unless...
-                        if (eyeData.ContainsKey(msg.Address.ToString()))
+                    if (messageReceived != null)
+                    {
+                        for (int i = 0; i < 11; i++)
                         {
-                            eyeData[msg.Address.ToString()] = (float) msg.Arguments[0];
-                            Console.WriteLine($"{msg.Address.ToString()}'s value is now {(float) msg.Arguments[0]}");
+                            // Console.WriteLine("Number of messages: " + messageReceived.Messages.Count);
+                            // Console.WriteLine(msg.Address.ToString());
+                            // Console.WriteLine((float) msg.Arguments[0]);
+                            // Console.WriteLine($"{msg.Address.ToString()}'s value is now {(float)msg.Arguments[0]}");
+
+                            eyeData[i] = (float)messageReceived.Messages[i].Arguments[0];
                         }
+                        eyeData[eyeData.Length - 1] = messageReceived.Timetag;
+
                     }
-                    eyeData["/timestamp"] = messageReceived.Timetag;
                 }
+                catch (Exception e) { continue; }
                 Thread.Sleep(20);
             }
         }
