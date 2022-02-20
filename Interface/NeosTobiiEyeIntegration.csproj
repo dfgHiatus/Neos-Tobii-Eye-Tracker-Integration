@@ -57,6 +57,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Native.cs" />
     <Compile Include="NeosTobiiEye.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
