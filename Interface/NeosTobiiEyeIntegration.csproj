@@ -51,10 +51,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />
-    <Reference Include="Tobii.Research, Version=1.9.0.1198, Culture=neutral, PublicKeyToken=70326046dcdce6cb, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\TobiiNET\TobiiPro\Tobii.Research.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Native.cs" />
