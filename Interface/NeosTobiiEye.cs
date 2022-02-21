@@ -4,6 +4,7 @@ using FrooxEngine;
 using BaseX;
 using System;
 using TobiiEyeBridge;
+using System.Threading;
 
 namespace NeosTobiiEyeIntegration
 {
@@ -22,6 +23,7 @@ namespace NeosTobiiEyeIntegration
 		// VR
 		public static Native.Tobii_wearable_consumer_data_t eyeConsumerDataVR; // CONSUMER
 		public static string deviceName;
+		public static Thread _thread;
 
 		public override string Name => "Neos-Tobii-Eye-Integration";
 		public override string Author => "dfgHiatus";
@@ -32,60 +34,64 @@ namespace NeosTobiiEyeIntegration
 		{
 			try
 			{
-				error = Native.Tobii_api_create(out tobiiAPI, IntPtr.Zero, IntPtr.Zero);
-				error = Native.Tobii_enumerate_local_device_urls(tobiiAPI, setupDevice, IntPtr.Zero);
+                _thread = new Thread(() =>
+                {
+                    error = Native.Tobii_api_create(out tobiiAPI, IntPtr.Zero, IntPtr.Zero);
+                    error = Native.Tobii_enumerate_local_device_urls(tobiiAPI, setupDevice, IntPtr.Zero);
 
-				Debug($"Establishing connection to {deviceName}...");
-				error = Native.Tobii_device_create(tobiiAPI, deviceName, Native.Tobii_field_of_use_t.FieldOfUseInteractive, out tobiiDevice);
-				if (error != Native.Tobii_error_t.ErrorNoError)
-					Debug("An error occured while connecting to this device. Error Code" + (int)error);
+                    Debug($"Establishing connection to {deviceName}...");
+                    error = Native.Tobii_device_create(tobiiAPI, deviceName, Native.Tobii_field_of_use_t.FieldOfUseInteractive, out tobiiDevice);
+                    if (error != Native.Tobii_error_t.ErrorNoError)
+                        Debug("An error occured while connecting to this device. Error Code" + (int)error);
 
-				// CONSUMER
-				error = Native.Tobii_wearable_consumer_data_subscribe(tobiiDevice, getEyeDataVR, IntPtr.Zero);
-				if (error != Native.Tobii_error_t.ErrorNoError)
-					Debug("An error occured while connecting to this device. Error Code" + (int)error);
+                    // CONSUMER
+                    error = Native.Tobii_wearable_consumer_data_subscribe(tobiiDevice, getEyeDataVR, IntPtr.Zero);
+                    if (error != Native.Tobii_error_t.ErrorNoError)
+                        Debug("An error occured while connecting to this device. Error Code" + (int)error);
 
 
-				Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamWearable3dGazeCombined, ref tobii_Capability);
-				if (tobii_Capability != Native.Tobii_supported_t.Supported)
-				{
-					Warn($"This VR headset does not support 3D Combined Gaze.");
-				}
-				Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamWearable3dGazePerEye, ref tobii_Capability);
-				if (tobii_Capability != Native.Tobii_supported_t.Supported)
-				{
-					Warn($"This VR headset does not support 3D Per Eye Gaze.");
-				}
-				Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamUserPositionGuideXy, ref tobii_Capability);
-				if (tobii_Capability != Native.Tobii_supported_t.Supported)
-				{
-					Warn($"This VR headset does not support 2D Per-Eye XY.");
-				}
-				Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamWearablePupilPosition, ref tobii_Capability);
-				if (tobii_Capability != Native.Tobii_supported_t.Supported)
-				{
-					Warn($"This VR headset does not support 2D Pupil XY.");
-				}
-				Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamUserPositionGuideZ, ref tobii_Capability);
-				if (tobii_Capability != Native.Tobii_supported_t.Supported)
-				{
-					Warn($"This VR headset does not support 2D Per-Eye Z.");
-				}
-				Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamWearableEyeOpenness, ref tobii_Capability);
-				if (tobii_Capability != Native.Tobii_supported_t.Supported)
-				{
-					Warn($"This VR headset does not support 0.0-1.0 eye openess.");
-				}
-				Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamWearablePupilDiameter, ref tobii_Capability);
-				if (tobii_Capability != Native.Tobii_supported_t.Supported)
-				{
-					Warn($"This VR headset does not support pupil dilation.");
-				}
-				Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamWearableConvergenceDistance, ref tobii_Capability);
-				if (tobii_Capability != Native.Tobii_supported_t.Supported)
-				{
-					Warn($"This VR headset does not support convergence distance.");
-				}
+                    Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamWearable3dGazeCombined, ref tobii_Capability);
+                    if (tobii_Capability != Native.Tobii_supported_t.Supported)
+                    {
+                        Warn($"This VR headset does not support 3D Combined Gaze.");
+                    }
+                    Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamWearable3dGazePerEye, ref tobii_Capability);
+                    if (tobii_Capability != Native.Tobii_supported_t.Supported)
+                    {
+                        Warn($"This VR headset does not support 3D Per Eye Gaze.");
+                    }
+                    Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamUserPositionGuideXy, ref tobii_Capability);
+                    if (tobii_Capability != Native.Tobii_supported_t.Supported)
+                    {
+                        Warn($"This VR headset does not support 2D Per-Eye XY.");
+                    }
+                    Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamWearablePupilPosition, ref tobii_Capability);
+                    if (tobii_Capability != Native.Tobii_supported_t.Supported)
+                    {
+                        Warn($"This VR headset does not support 2D Pupil XY.");
+                    }
+                    Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamUserPositionGuideZ, ref tobii_Capability);
+                    if (tobii_Capability != Native.Tobii_supported_t.Supported)
+                    {
+                        Warn($"This VR headset does not support 2D Per-Eye Z.");
+                    }
+                    Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamWearableEyeOpenness, ref tobii_Capability);
+                    if (tobii_Capability != Native.Tobii_supported_t.Supported)
+                    {
+                        Warn($"This VR headset does not support 0.0-1.0 eye openess.");
+                    }
+                    Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamWearablePupilDiameter, ref tobii_Capability);
+                    if (tobii_Capability != Native.Tobii_supported_t.Supported)
+                    {
+                        Warn($"This VR headset does not support pupil dilation.");
+                    }
+                    Native.Tobii_capability_supported(tobiiDevice, Native.Tobii_capability_t.CapabilityCompoundStreamWearableConvergenceDistance, ref tobii_Capability);
+                    if (tobii_Capability != Native.Tobii_supported_t.Supported)
+                    {
+                        Warn($"This VR headset does not support convergence distance.");
+                    }
+                });
+                _thread.Start();
 
 				Debug($"VR mode initiallized!");
 				Native.Tobii_get_device_info(tobiiDevice, ref tobiiDeviceInfo);
@@ -100,7 +106,7 @@ namespace NeosTobiiEyeIntegration
 			}
 		}
 
-		private static void setupDevice(string device, IntPtr intptr)
+        private static void setupDevice(string device, IntPtr intptr)
 		{
 			try
 			{
@@ -130,6 +136,7 @@ namespace NeosTobiiEyeIntegration
 			public static bool Prefix()
 			{
 				// CONSUMER
+				_thread.Abort();
 				Native.Tobii_wearable_consumer_data_unsubscribe(tobiiDevice);
 				Native.Tobii_device_destroy(tobiiDevice);
 				Native.Tobii_api_destroy(tobiiAPI);
