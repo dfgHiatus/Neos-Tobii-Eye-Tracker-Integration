@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Neos_Tobii_Eye-Integration")]
+[assembly: AssemblyTitle("Neos_Tobii_Eye_Integration")]
 [assembly: AssemblyDescription("A Tobii Eye DevKit Integration")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Hiatus Labs")]
-[assembly: AssemblyProduct("Neos_Tobii_Eye-Integration")]
+[assembly: AssemblyProduct("Neos_Tobii_Eye_Integration")]
 [assembly: AssemblyCopyright("Copyright ©  2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
