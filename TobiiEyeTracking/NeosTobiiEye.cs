@@ -3,10 +3,6 @@ using NeosModLoader;
 using FrooxEngine;
 using BaseX;
 using System;
-using EyeXFramework;
-using Tobii.EyeX.Framework;
-using System.Threading;
-using TobiiAPI;
 
 namespace NeosTobiiEyeIntegration
 {
@@ -16,23 +12,11 @@ namespace NeosTobiiEyeIntegration
 		public override string Author => "dfgHiatus";
 		public override string Version => "1.0.0";
 		public override string Link => "https://github.com/dfgHiatus/Neos-Tobii-Eye-Tracker-Integration";
-
-		private static TobiiScreen tobiiX;
 		
 		public override void OnEngineInit()
 		{
 			Harmony harmony = new Harmony("net.dfg.Tobii-Screen-Eye-Tracking");
 			harmony.PatchAll();
-		}
-
-		[HarmonyPatch(typeof(Engine), "Shutdown")]
-		public class ShutdownPatch
-		{
-			public static bool Prefix()
-			{
-				tobiiX.Teardown();
-				return true;
-			}
 		}
 
 		[HarmonyPatch(typeof(InputInterface), MethodType.Constructor)]
@@ -43,8 +27,7 @@ namespace NeosTobiiEyeIntegration
 			{
 				try
 				{
-					tobiiX = new TobiiScreen();
-					if (tobiiX.Init())
+					if (TobiiCompanionInterface.Connect())
                     {
 						GenericInputDevice gen = new GenericInputDevice();
 						Debug("Module Name: " + gen.ToString());
@@ -79,7 +62,7 @@ namespace NeosTobiiEyeIntegration
 				DataTreeDictionary EyeDataTreeDictionary = new DataTreeDictionary();
 				EyeDataTreeDictionary.Add($"Name", $"Tobii Eye Tracking");
 				EyeDataTreeDictionary.Add($"Type", $"Eye Tracking");
-				EyeDataTreeDictionary.Add($"Model", $"{ tobiiX.deviceName }");
+				EyeDataTreeDictionary.Add($"Model", $"{ TobiiCompanionInterface.gazeData.deviceInfo.name }");
 				list.Add(EyeDataTreeDictionary);
 			}
 
@@ -90,38 +73,45 @@ namespace NeosTobiiEyeIntegration
 
 			public void UpdateInputs(float deltaTime)
 			{
-				// Because other threads are iffy?
-				tobiiX.Update();
-
 				eyes.IsEyeTrackingActive = !Engine.Current.InputInterface.VR_Active;
+
 				eyes.LeftEye.IsDeviceActive = !Engine.Current.InputInterface.VR_Active;
+				eyes.LeftEye.IsTracking = TobiiCompanionInterface.gazeData.leftEye.origin.validity == Validity.Valid;
+				eyes.LeftEye.Direction = ((float3)new double3(MathX.Tan(MathX.Remap(TobiiCompanionInterface.gazeData.leftEye.direction.x, 0, 1, -1, 1)),
+															  MathX.Tan(-MathX.Remap(TobiiCompanionInterface.gazeData.leftEye.direction.y, 0, 1, -1, 1)),
+															  1f)).Normalized;
+				eyes.LeftEye.RawPosition = ((float3)new double3(TobiiCompanionInterface.gazeData.leftEye.origin.x,
+													   TobiiCompanionInterface.gazeData.leftEye.origin.y,
+													   TobiiCompanionInterface.gazeData.leftEye.origin.z)).Normalized;
+				eyes.LeftEye.PupilDiameter = 0.003f;
+				eyes.LeftEye.Openness = 1f;
+				eyes.LeftEye.Widen = 0f;
+				eyes.LeftEye.Squeeze = 0f;
+				eyes.LeftEye.Frown = 0f;
 
-				eyes.LeftEye.IsTracking = tobiiX.LeftIsDeviceTracking;
-				eyes.LeftEye.Direction = tobiiX.LeftEyeDirection;
-				eyes.LeftEye.RawPosition = tobiiX.LeftEyeRawPosition;
-				eyes.LeftEye.PupilDiameter = tobiiX.LeftPupilDiameter;
-				eyes.LeftEye.Openness = tobiiX.LeftOpenness;
-				eyes.LeftEye.Widen = tobiiX.LeftWiden;
-				eyes.LeftEye.Squeeze = tobiiX.LeftSqueeze;
-				eyes.LeftEye.Frown = tobiiX.LeftFrown;
+				eyes.RightEye.IsDeviceActive = !Engine.Current.InputInterface.VR_Active;
+				eyes.RightEye.IsTracking = TobiiCompanionInterface.gazeData.rightEye.origin.validity == Validity.Valid;
+				eyes.RightEye.Direction = ((float3)new double3(MathX.Tan(MathX.Remap(TobiiCompanionInterface.gazeData.rightEye.direction.x, 0, 1, -1, 1)),
+															  MathX.Tan(-MathX.Remap(TobiiCompanionInterface.gazeData.rightEye.direction.y, 0, 1, -1, 1)),
+															  1f)).Normalized; 
+				eyes.RightEye.RawPosition = ((float3)new double3(TobiiCompanionInterface.gazeData.rightEye.origin.x,
+													   TobiiCompanionInterface.gazeData.rightEye.origin.y,
+													   TobiiCompanionInterface.gazeData.rightEye.origin.z)).Normalized;
+				eyes.RightEye.PupilDiameter = 0.003f;
+				eyes.RightEye.Openness = 0f;
+				eyes.RightEye.Widen = 0f;
+				eyes.RightEye.Squeeze = 0f;
+				eyes.RightEye.Frown = 0f;
 
-				eyes.RightEye.IsTracking = tobiiX.RightIsDeviceTracking;
-				eyes.RightEye.Direction = tobiiX.RightEyeDirection;
-				eyes.RightEye.RawPosition = tobiiX.RightEyeRawPosition;
-				eyes.RightEye.PupilDiameter = tobiiX.RightPupilDiameter;
-				eyes.RightEye.Openness = tobiiX.RightOpenness;
-				eyes.RightEye.Widen = tobiiX.RightWiden;
-				eyes.RightEye.Squeeze = tobiiX.RightSqueeze;
-				eyes.RightEye.Frown = tobiiX.RightFrown;
-
+/*				eyes.CombinedEye.IsDeviceActive = !Engine.Current.InputInterface.VR_Active;
 				eyes.CombinedEye.IsTracking = tobiiX.CombinedIsDeviceTracking;
 				eyes.CombinedEye.Direction = tobiiX.CombinedEyeDirection;
 				eyes.CombinedEye.RawPosition = tobiiX.CombinedEyeRawPosition;
-				eyes.CombinedEye.PupilDiameter = tobiiX.CombinedPupilDiameter;
-				eyes.CombinedEye.Openness = tobiiX.CombinedOpenness;
-				eyes.CombinedEye.Widen = tobiiX.CombinedWiden;
-				eyes.CombinedEye.Squeeze = tobiiX.CombinedSqueeze;
-				eyes.CombinedEye.Frown = tobiiX.CombinedFrown;
+				eyes.CombinedEye.PupilDiameter = 0.003f;
+				eyes.CombinedEye.Openness = 1f;
+				eyes.CombinedEye.Widen = 0f;
+				eyes.CombinedEye.Squeeze = 0f;
+				eyes.CombinedEye.Frown = 0f;*/
 
 				eyes.Timestamp += 0;
 			}

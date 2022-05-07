@@ -70,7 +70,7 @@
   <ItemGroup>
     <Compile Include="NeosTobiiEye.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TobiiScreen.cs" />
+    <Compile Include="TobiiInterface.cs" />
     <Compile Include="tobii\bindings\Tobii.StreamEngine.Interop.cs" />
   </ItemGroup>
   <ItemGroup>
