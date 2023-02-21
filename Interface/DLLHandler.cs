@@ -1,9 +1,17 @@
 ﻿using System;
-using System.ComponentModel;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using System.Text;
 using System.Runtime.InteropServices;
+using System.IO;
+using System.Reflection;
+using System.Diagnostics;
+using System.ComponentModel;
+
+using BaseX;
+using FrooxEngine;
+using HarmonyLib;
+using NeosModLoader;
 
 // Thanks to https://stackoverflow.com/questions/666799/embedding-unmanaged-dll-into-a-managed-c-sharp-dll Mark Lakata for this
 
@@ -34,6 +42,9 @@ namespace Qromodyn
     public class EmbeddedDllClass
     {
         private static string tempFolder = "";
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+            private static extern void SetDllDirectory(string lpPathName);
 
         /// <summary>
         /// Extract DLLs from resources to temporary folder
