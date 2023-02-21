@@ -65,9 +65,8 @@ namespace NeosTobiiEyeIntegration
         {
             // Extract Embedded Tobii Stream Engine DLL for use in Tobii.StreamEngine.Native.cs
             // For some reason, it seems DllImport is no longer reading from the PATH environment variable so this doesn't work. Maybe its behaviour was changed by Neos or the like I'm not sure.
-            //EmbeddedDllClass.ExtractEmbeddedDlls("tobii_stream_engine.dll", Properties.Resources.tobii_stream_engine);
-
-            UniLog.Log("THE PATH AFTER IMPORT IS :" + Environment.GetEnvironmentVariable("PATH"));
+            // EmbeddedDllClass.ExtractEmbeddedDlls("tobii_stream_engine.dll", Properties.Resources.tobii_stream_engine);
+            // UniLog.Log("THE PATH AFTER IMPORT IS :" + Environment.GetEnvironmentVariable("PATH"));
 
             // Create API context
             var error = Native.tobii_api_create(out apiContext, null);
