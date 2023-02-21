@@ -1,6 +1,7 @@
 ﻿using FrooxEngine;
 using HarmonyLib;
 using NeosModLoader;
+using Qromodyn;
 
 namespace NeosTobiiEyeIntegration
 {
@@ -11,15 +12,13 @@ namespace NeosTobiiEyeIntegration
 		public override string Version => "alpha-vr-1.0.7";
 		public override string Link => "https://github.com/dfgHiatus/Neos-Tobii-Eye-Tracker-Integration";
 
-        private static TobiiInputDevice tobiiInputDevice;
-
         public override void OnEngineInit()
 		{
-			Harmony harmony = new Harmony("net.dfgHiatus.Neos-Tobii-Eye-Integration");
-			harmony.PatchAll();
+            new Harmony("net.dfgHiatus.Neos-Tobii-Eye-Integration").PatchAll();
 
-            tobiiInputDevice.Teardown();
-            Engine.Current.OnShutdown += () => tobiiInputDevice.Teardown();
+            TobiiInputDevice tobiiInputDevice = new TobiiInputDevice();
+            tobiiInputDevice.Start();
+            Engine.Current.OnShutdown += () => tobiiInputDevice.Stop();
         }
 	}
 }

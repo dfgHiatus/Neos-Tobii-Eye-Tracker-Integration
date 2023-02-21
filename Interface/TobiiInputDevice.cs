@@ -19,7 +19,6 @@ namespace NeosTobiiEyeIntegration
         private IntPtr apiContext = Marshal.AllocHGlobal(1024);
         private IntPtr deviceContext = Marshal.AllocHGlobal(1024);
         private List<string> urls;
-        private tobii_error_t result;
 
         private Thread _thread;
         private CancellationTokenSource _cancellationToken;
@@ -43,7 +42,7 @@ namespace NeosTobiiEyeIntegration
 
         public void UpdateInputs(float deltaTime)
         {
-            var status = Engine.Current.InputInterface.VR_Active;
+            var status = true; // Engine.Current.InputInterface.VR_Active;
             eyes.IsEyeTrackingActive = status;
 
             UpdateEye(Project2DTo3D(ParsedtrackingData.left_eye.eye_x, ParsedtrackingData.left_eye.eye_y), 
@@ -65,53 +64,38 @@ namespace NeosTobiiEyeIntegration
         public void Start()
         {
             // Extract Embedded Tobii Stream Engine DLL for use in Tobii.StreamEngine.Native.cs
-            EmbeddedDllClass.ExtractEmbeddedDlls("tobii_stream_engine.dll", Properties.Resources.tobii_stream_engine);
+            // EmbeddedDllClass.ExtractEmbeddedDlls("tobii_stream_engine.dll",  TobiiEye.Properties.Resources.tobii_stream_engine);
 
             // Create API context
-            result = Native.tobii_api_create(out apiContext, null);
+            var error = Native.tobii_api_create(out apiContext, null);
+            UniLog.Log(error.ToString());
+            UniLog.Log(apiContext);
 
             // Enumerate devices to find connected eye trackers
-            result = Native.tobii_enumerate_local_device_urls(apiContext, out urls);
+            error = Native.tobii_enumerate_local_device_urls(apiContext, out urls);
             if (urls.Count == 0)
             {
                 UniLog.Error("Error: No device found");
                 return;
             }
 
-            // Connect to the first tracker found
-            result = Native.tobii_device_create(apiContext, urls[0], Native.tobii_field_of_use_t.TOBII_FIELD_OF_USE_STORE_OR_TRANSFER_FALSE, out deviceContext);
-            result = Native.tobii_wearable_consumer_data_subscribe(deviceContext, UpdateTobiiCallbacks);
+            UniLog.Log(error.ToString());
+            UniLog.Log(urls.Count);
+            UniLog.Log(urls[0]);
 
+            // Connect to the first tracker found
+            Native.tobii_device_create(
+                apiContext, 
+                urls[0], 
+                Native.tobii_field_of_use_t.TOBII_FIELD_OF_USE_STORE_OR_TRANSFER_FALSE, 
+                out deviceContext);
+            
             _thread.Start(new ThreadStart(OuterLoop));
         }
-
-        private void UpdateTobiiCallbacks(ref tobii_wearable_consumer_data_t consumerData, IntPtr userData)
-        {
-            //if (Status.EyeState == ModuleState.Active)
-            //{
-                if (consumerData.left.blink_validity == tobii_validity_t.TOBII_VALIDITY_VALID)
-                    ParsedtrackingData.left_eye.eye_lid_openness = consumerData.left.blink == tobii_state_bool_t.TOBII_STATE_BOOL_TRUE ? (float)0 : (float)1;
-
-                if (consumerData.right.blink_validity == tobii_validity_t.TOBII_VALIDITY_VALID)
-                    ParsedtrackingData.right_eye.eye_lid_openness = consumerData.right.blink == tobii_state_bool_t.TOBII_STATE_BOOL_TRUE ? (float)0 : (float)1;
-
-                if (consumerData.left.pupil_position_in_sensor_area_validity == tobii_validity_t.TOBII_VALIDITY_VALID && consumerData.left.blink_validity == tobii_validity_t.TOBII_VALIDITY_VALID)
-                {
-                    ParsedtrackingData.left_eye.eye_x = consumerData.left.pupil_position_in_sensor_area_xy.x;
-                    ParsedtrackingData.left_eye.eye_y = consumerData.left.pupil_position_in_sensor_area_xy.y;
-                }
-
-
-                if (consumerData.right.pupil_position_in_sensor_area_validity == tobii_validity_t.TOBII_VALIDITY_VALID && consumerData.right.blink_validity == tobii_validity_t.TOBII_VALIDITY_VALID)
-                {
-                    ParsedtrackingData.right_eye.eye_x = consumerData.right.pupil_position_in_sensor_area_xy.x;
-                    ParsedtrackingData.right_eye.eye_y = consumerData.right.pupil_position_in_sensor_area_xy.y;
-                }
-            //}
-        }
-        
         private void OuterLoop()
         {
+            Native.tobii_wearable_consumer_data_subscribe(deviceContext, UpdateTobiiCallbacks);
+
             while (!_cancellationToken.IsCancellationRequested)
             {
                 // Optionally block this thread until data is available. Especially useful if running in a separate thread.
@@ -124,6 +108,35 @@ namespace NeosTobiiEyeIntegration
             }
         }
 
+        private void UpdateTobiiCallbacks(ref tobii_wearable_consumer_data_t consumerData, IntPtr userData)
+        {
+            if (consumerData.left.blink_validity == tobii_validity_t.TOBII_VALIDITY_VALID)
+                ParsedtrackingData.left_eye.eye_lid_openness = consumerData.left.blink 
+                    == tobii_state_bool_t.TOBII_STATE_BOOL_TRUE ? 0f : 1f;
+
+            if (consumerData.right.blink_validity == tobii_validity_t.TOBII_VALIDITY_VALID)
+                ParsedtrackingData.right_eye.eye_lid_openness = consumerData.right.blink 
+                    == tobii_state_bool_t.TOBII_STATE_BOOL_TRUE ? 0f : 1f;
+
+            if (consumerData.left.pupil_position_in_sensor_area_validity 
+                == tobii_validity_t.TOBII_VALIDITY_VALID && 
+                consumerData.left.blink_validity 
+                == tobii_validity_t.TOBII_VALIDITY_VALID)
+            {
+                ParsedtrackingData.left_eye.eye_x = consumerData.left.pupil_position_in_sensor_area_xy.x;
+                ParsedtrackingData.left_eye.eye_y = consumerData.left.pupil_position_in_sensor_area_xy.y;
+            }
+
+            if (consumerData.right.pupil_position_in_sensor_area_validity 
+                == tobii_validity_t.TOBII_VALIDITY_VALID && 
+                consumerData.right.blink_validity 
+                == tobii_validity_t.TOBII_VALIDITY_VALID)
+            {
+                ParsedtrackingData.right_eye.eye_x = consumerData.right.pupil_position_in_sensor_area_xy.x;
+                ParsedtrackingData.right_eye.eye_y = consumerData.right.pupil_position_in_sensor_area_xy.y;
+            }
+        }
+        
         private void UpdateEye(float3 gazeDirection, bool status, float openness, float deltaTime, Eye eye)
         {
             eye.IsDeviceActive = Engine.Current.InputInterface.VR_Active;
@@ -149,7 +162,7 @@ namespace NeosTobiiEyeIntegration
                               1f).Normalized;
         }
 
-        public void Teardown()
+        public void Stop()
         {
             _cancellationToken.Cancel();
             Native.tobii_wearable_consumer_data_unsubscribe(deviceContext);
