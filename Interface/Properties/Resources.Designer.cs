@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TobiiEye.Properties {
+namespace NeosTobiiEyeIntegration.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace TobiiEye.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TobiiEye.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NeosTobiiEyeIntegration.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,6 +57,16 @@ namespace TobiiEye.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] tobii_stream_engine {
+            get {
+                object obj = ResourceManager.GetObject("tobii_stream_engine", resourceCulture);
+                return ((byte[])(obj));
             }
         }
     }

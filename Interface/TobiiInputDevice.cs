@@ -1,11 +1,11 @@
 ﻿using BaseX;
 using FrooxEngine;
-using Qromodyn;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Tobii.StreamEngine;
+using Qromodyn;
 
 namespace NeosTobiiEyeIntegration
 {
@@ -64,7 +64,9 @@ namespace NeosTobiiEyeIntegration
         public void Start()
         {
             // Extract Embedded Tobii Stream Engine DLL for use in Tobii.StreamEngine.Native.cs
-            // EmbeddedDllClass.ExtractEmbeddedDlls("tobii_stream_engine.dll",  TobiiEye.Properties.Resources.tobii_stream_engine);
+            // For some reason, it seems DllImport is no longer reading from the PATH environment variable so this doesn't work. Maybe its behaviour was changed by Neos or the like I'm not sure.
+            // EmbeddedDllClass.ExtractEmbeddedDlls("tobii_stream_engine.dll", Properties.Resources.tobii_stream_engine);
+            // UniLog.Log("THE PATH AFTER IMPORT IS :" + Environment.GetEnvironmentVariable("PATH"));
 
             // Create API context
             var error = Native.tobii_api_create(out apiContext, null);
@@ -83,20 +85,22 @@ namespace NeosTobiiEyeIntegration
             UniLog.Log(urls.Count);
             UniLog.Log(urls[0]);
 
-            // Connect to the first tracker found
-            Native.tobii_device_create(
-                apiContext, 
-                urls[0], 
-                Native.tobii_field_of_use_t.TOBII_FIELD_OF_USE_STORE_OR_TRANSFER_FALSE, 
-                out deviceContext);
-            
-            _thread.Start(new ThreadStart(OuterLoop));
+            // Assign thread to run OuterLoop job and start - For some reason the previous way you created the thread makes the error!
+            _thread = new Thread(OuterLoop);
+            _thread.Start();
         }
         private void OuterLoop()
         {
+            // Connect to the first tracker found - For some reason I also needed to move this into the tracking thread
+            Native.tobii_device_create(
+                apiContext,
+                urls[0],
+                Native.tobii_field_of_use_t.TOBII_FIELD_OF_USE_STORE_OR_TRANSFER_FALSE,
+                out deviceContext);
+
             Native.tobii_wearable_consumer_data_subscribe(deviceContext, UpdateTobiiCallbacks);
 
-            while (!_cancellationToken.IsCancellationRequested)
+            while (true) // For some reason !_cancellationToken.IsCancellationRequested also flagged an error so changed for now
             {
                 // Optionally block this thread until data is available. Especially useful if running in a separate thread.
                 Native.tobii_wait_for_callbacks(new[] { deviceContext });
@@ -104,7 +108,7 @@ namespace NeosTobiiEyeIntegration
                 // Process callbacks on this thread if data is available
                 Native.tobii_device_process_callbacks(deviceContext);
 
-                Thread.Sleep(10);
+                // Thread.Sleep(10);
             }
         }
 
@@ -135,8 +139,10 @@ namespace NeosTobiiEyeIntegration
                 ParsedtrackingData.right_eye.eye_x = consumerData.right.pupil_position_in_sensor_area_xy.x;
                 ParsedtrackingData.right_eye.eye_y = consumerData.right.pupil_position_in_sensor_area_xy.y;
             }
+
+            UniLog.Log("Now on the callback method! Here's some blinking data :" + ParsedtrackingData.left_eye.eye_lid_openness + ParsedtrackingData.right_eye.eye_lid_openness);
         }
-        
+
         private void UpdateEye(float3 gazeDirection, bool status, float openness, float deltaTime, Eye eye)
         {
             eye.IsDeviceActive = Engine.Current.InputInterface.VR_Active;

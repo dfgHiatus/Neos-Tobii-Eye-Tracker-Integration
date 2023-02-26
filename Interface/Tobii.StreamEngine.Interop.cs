@@ -20,7 +20,7 @@ namespace Tobii.StreamEngine
     public static class Native
     {
 
-        public const string stream_engine_dll = "tobii_stream_engine";
+        public const string stream_engine_dll = "tobii_stream_engine.dll";
 
         public static string tobii_error_message(tobii_error_t result_code)
         {
