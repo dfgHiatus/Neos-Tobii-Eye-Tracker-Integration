@@ -70,8 +70,6 @@ namespace NeosTobiiEyeIntegration
 
             // Create API context
             var error = Native.tobii_api_create(out apiContext, null);
-            UniLog.Log(error.ToString());
-            UniLog.Log(apiContext);
 
             // Enumerate devices to find connected eye trackers
             error = Native.tobii_enumerate_local_device_urls(apiContext, out urls);
@@ -80,10 +78,6 @@ namespace NeosTobiiEyeIntegration
                 UniLog.Error("Error: No device found");
                 return;
             }
-
-            UniLog.Log(error.ToString());
-            UniLog.Log(urls.Count);
-            UniLog.Log(urls[0]);
 
             // Assign thread to run OuterLoop job and start - For some reason the previous way you created the thread makes the error!
             _thread = new Thread(OuterLoop);
