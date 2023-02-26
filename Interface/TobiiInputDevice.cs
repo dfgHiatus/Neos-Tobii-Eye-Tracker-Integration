@@ -21,7 +21,6 @@ namespace NeosTobiiEyeIntegration
         private List<string> urls;
 
         private Thread _thread;
-        private CancellationTokenSource _cancellationToken;
 
         // Initialise struct which tracking data will be inputted into
         private TobiiXRExternalTrackingDataStruct ParsedtrackingData;
@@ -133,8 +132,6 @@ namespace NeosTobiiEyeIntegration
                 ParsedtrackingData.right_eye.eye_x = consumerData.right.pupil_position_in_sensor_area_xy.x;
                 ParsedtrackingData.right_eye.eye_y = consumerData.right.pupil_position_in_sensor_area_xy.y;
             }
-
-            UniLog.Log("Now on the callback method! Here's some blinking data :" + ParsedtrackingData.left_eye.eye_lid_openness + ParsedtrackingData.right_eye.eye_lid_openness);
         }
 
         private void UpdateEye(float3 gazeDirection, bool status, float openness, float deltaTime, Eye eye)
@@ -164,7 +161,6 @@ namespace NeosTobiiEyeIntegration
 
         public void Stop()
         {
-            _cancellationToken.Cancel();
             Native.tobii_wearable_consumer_data_unsubscribe(deviceContext);
             Native.tobii_device_destroy(deviceContext);
             Native.tobii_api_destroy(apiContext);
